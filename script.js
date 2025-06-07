@@ -1,5 +1,8 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+canvas.width = 1000;
+canvas.height = 1000;
+
 const imagenInput = document.getElementById('imagen');
 const nombreInput = document.getElementById('nombre');
 const danzaSelect = document.getElementById('danza');
@@ -16,7 +19,7 @@ let offsetY = 0;
 let imageLoaded = false;
 
 const maxScale = 3;
-const minScale = 0.5;
+const minScale = 0.3;
 
 imagenInput.addEventListener('change', (e) => {
   const file = e.target.files[0];
@@ -31,13 +34,17 @@ imagenInput.addEventListener('change', (e) => {
 
 img.onload = function () {
   imageLoaded = true;
+
+  // Centrar imagen
   offsetX = 0;
   offsetY = 0;
   scale = 1;
+
   drawCanvas();
 };
 
 marco.onload = drawCanvas;
+
 nombreInput.addEventListener('input', drawCanvas);
 danzaSelect.addEventListener('change', () => {
   otraDanzaInput.style.display = danzaSelect.value === 'otro' ? 'block' : 'none';
@@ -48,6 +55,7 @@ otraDanzaInput.addEventListener('input', drawCanvas);
 function drawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Dibujar imagen del usuario detrás del marco
   if (imageLoaded) {
     const imgWidth = img.width * scale;
     const imgHeight = img.height * scale;
@@ -56,26 +64,28 @@ function drawCanvas() {
     ctx.drawImage(img, x, y, imgWidth, imgHeight);
   }
 
+  // Dibujar marco encima
   ctx.drawImage(marco, 0, 0, canvas.width, canvas.height);
 
+  // Dibujar textos
   ctx.fillStyle = 'white';
-  ctx.font = 'bold 38px Arial';
+  ctx.font = 'bold 34px Arial';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
 
   const linesNombre = nombreInput.value.trim().split(" ");
   linesNombre.forEach((line, i) => {
-    ctx.fillText(line, 30, 500 - 50 + i * 28);
+    ctx.fillText(line, 30, 850 + i * 30);
   });
 
   const danza = danzaSelect.value === 'otro' ? otraDanzaInput.value : danzaSelect.value;
   const linesDanza = ['DANZA:', danza];
   linesDanza.forEach((line, i) => {
-    ctx.fillText(line, 30, 500 + 70 + i * 28);
+    ctx.fillText(line, 30, 920 + i * 30);
   });
 }
 
-// Eventos de mouse para escritorio
+// Mouse: mover imagen
 let isDragging = false;
 let lastX = 0;
 let lastY = 0;
@@ -101,14 +111,15 @@ canvas.addEventListener('mousemove', (e) => {
 canvas.addEventListener('mouseup', () => isDragging = false);
 canvas.addEventListener('mouseleave', () => isDragging = false);
 
+// Zoom con scroll
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
   const delta = e.deltaY < 0 ? 1.1 : 0.9;
-  scale = Math.min(maxScale, Math.max(minScale, scale * delta));
+  scale = Math.max(minScale, Math.min(maxScale, scale * delta));
   drawCanvas();
 }, { passive: false });
 
-// Eventos táctiles para móviles
+// Tocar en celular: mover y zoom táctil
 let startX, startY;
 let initialDistance = 0;
 let initialScale = scale;
@@ -145,7 +156,7 @@ canvas.addEventListener('touchmove', (e) => {
       e.touches[0].clientY - e.touches[1].clientY
     );
     const scaleFactor = currentDistance / initialDistance;
-    scale = Math.min(maxScale, Math.max(minScale, initialScale * scaleFactor));
+    scale = Math.max(minScale, Math.min(maxScale, initialScale * scaleFactor));
     drawCanvas();
   }
 }, { passive: false });
@@ -155,9 +166,7 @@ canvas.addEventListener('touchend', () => {
   isPinching = false;
 });
 
-btnDescargar.addEventListener('click', descargarImagen);
-
-function descargarImagen() {
+btnDescargar.addEventListener('click', () => {
   if (!imageLoaded || !nombreInput.value.trim()) {
     alert("Por favor, sube una imagen y escribe tu nombre.");
     return;
@@ -167,59 +176,59 @@ function descargarImagen() {
   if (!confirmacion) return;
 
   const exportCanvas = document.createElement('canvas');
-  const exportCtx = exportCanvas.getContext('2d');
   exportCanvas.width = 2000;
   exportCanvas.height = 2000;
+  const exportCtx = exportCanvas.getContext('2d');
 
+  // Escalar todo proporcionalmente
+  const factor = 2;
+
+  // Imagen
   if (imageLoaded) {
-    const scaleFactor = 2000 / canvas.width;
-    const imgWidth = img.width * scale * scaleFactor;
-    const imgHeight = img.height * scale * scaleFactor;
-    const x = (2000 - imgWidth) / 2 + offsetX * scaleFactor;
-    const y = (2000 - imgHeight) / 2 + offsetY * scaleFactor;
+    const imgWidth = img.width * scale * factor;
+    const imgHeight = img.height * scale * factor;
+    const x = (2000 - imgWidth) / 2 + offsetX * factor;
+    const y = (2000 - imgHeight) / 2 + offsetY * factor;
     exportCtx.drawImage(img, x, y, imgWidth, imgHeight);
   }
 
-  const tempImg = new Image();
-  tempImg.src = marco.src;
-  tempImg.onload = () => {
-    exportCtx.drawImage(tempImg, 0, 0, 2000, 2000);
+  // Marco
+  const marcoGrande = new Image();
+  marcoGrande.src = marco.src;
+  marcoGrande.onload = () => {
+    exportCtx.drawImage(marcoGrande, 0, 0, 2000, 2000);
 
     exportCtx.fillStyle = 'white';
-    exportCtx.font = 'bold 87px Arial';
+    exportCtx.font = 'bold 72px Arial';
     exportCtx.textAlign = 'left';
     exportCtx.textBaseline = 'middle';
 
     const linesNombre = nombreInput.value.trim().split(" ");
     linesNombre.forEach((line, i) => {
-      exportCtx.fillText(line, 70, 1000 - 70 + i * 54);
+      exportCtx.fillText(line, 60, 1700 + i * 55);
     });
 
-    const linesDanza = ['DANZA:', ...(danzaSelect.value === 'otro' ? [otraDanzaInput.value] : [danzaSelect.value])];
+    const danza = danzaSelect.value === 'otro' ? otraDanzaInput.value : danzaSelect.value;
+    const linesDanza = ['DANZA:', danza];
     linesDanza.forEach((line, i) => {
-      exportCtx.fillText(line, 70, 1000 + 100 + i * 54);
+      exportCtx.fillText(line, 60, 1850 + i * 55);
     });
 
     exportCanvas.toBlob(function(blob) {
-      if (!blob) {
-        alert("Error al generar la imagen.");
-        return;
-      }
-
-      const numeroAleatorio = Math.floor(100000 + Math.random() * 900000);
-      const filename = `SERGIO_VARGAS_GESTION_FUL_USFX_NACER_${numeroAleatorio}.png`;
+      const num = Math.floor(Math.random() * 1000000);
+      const filename = `SERGIO_VARGAS_GESTION_FUL_USFX_NACER_${num}.png`;
 
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
 
       setTimeout(() => {
         window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSeTfMtTzWq7LVPUl8tJ5lIt2DnlISnz192LWabErIw70FN-wA/viewform?usp=header";
-      }, 2000);
+      }, 1500);
     }, 'image/png');
   };
-}
+});
