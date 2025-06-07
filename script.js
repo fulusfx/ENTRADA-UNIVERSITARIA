@@ -10,11 +10,7 @@ const nombreDisplay = document.getElementById('nombreDisplay');
 const danzaDisplay = document.getElementById('danzaDisplay').querySelector('span');
 const sensibilidadRange = document.getElementById('sensibilidadRange');
 
-// Configuración de imagen
-let img = new Image();
-let imageLoaded = false;
-
-// Tamaño del canvas (1x1)
+// Configuración del canvas visible
 canvas.width = 300;
 canvas.height = 300;
 
@@ -28,8 +24,8 @@ const maxScale = 3;
 // Sensibilidad del movimiento con teclas
 let sensibilidad = parseInt(sensibilidadRange.value);
 
-// Contador para nombres únicos de descarga
-let downloadCounter = Math.floor(100000 + Math.random() * 900000); // Número aleatorio
+// Número aleatorio único para descarga
+let downloadCounter = Math.floor(100000 + Math.random() * 900000);
 
 // Cargar marco por defecto
 marco.onload = () => {
@@ -81,7 +77,6 @@ function actualizarTexto() {
 function drawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Dibujar imagen cargada
   if (imageLoaded) {
     const imgWidth = img.width * scale;
     const imgHeight = img.height * scale;
@@ -147,7 +142,7 @@ canvas.addEventListener('mouseleave', () => {
 
 // ====== MOVER CON TECLAS ======
 document.addEventListener('keydown', (e) => {
-  const step = sensibilidad;
+  const step = sensibilidad / 2; // Más suave
   switch (e.key) {
     case 'ArrowUp':
       offsetY -= step;
@@ -169,7 +164,7 @@ document.addEventListener('keydown', (e) => {
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
   const delta = e.deltaY;
-  const step = 0.05;
+  const step = 0.01; // Más suave
   if (delta < 0) {
     scale = Math.min(maxScale, scale + step);
   } else {
@@ -180,7 +175,7 @@ canvas.addEventListener('wheel', (e) => {
 
 // ====== ZOOM CON BOTONES ======
 function zoom(action) {
-  const step = 0.1;
+  const step = 0.02; // Más suave
   if (action === 'in') {
     scale = Math.min(maxScale, scale + step);
   } else if (action === 'out') {
@@ -190,6 +185,7 @@ function zoom(action) {
 }
 
 // ====== PINCH TO ZOOM EN MÓVIL ======
+let isPinching = false;
 let startDistance = null;
 let lastScale = scale;
 
@@ -200,6 +196,7 @@ canvas.addEventListener('touchstart', (e) => {
     startY = e.touches[0].clientY;
   } else if (e.touches.length === 2) {
     isDragging = false;
+    isPinching = true;
     startDistance = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
@@ -218,14 +215,14 @@ canvas.addEventListener('touchmove', (e) => {
     startX = touch.clientX;
     startY = touch.clientY;
     drawCanvas();
-  } else if (e.touches.length === 2) {
+  } else if (e.touches.length === 2 && isPinching) {
     const currentDist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
       e.touches[0].clientY - e.touches[1].clientY
     );
 
     const delta = currentDist - startDistance;
-    const zoomFactor = delta * 0.01;
+    const zoomFactor = delta * 0.005; // Zoom más suave
     scale = Math.min(maxScale, Math.max(minScale, lastScale + zoomFactor));
     drawCanvas();
   }
@@ -233,7 +230,7 @@ canvas.addEventListener('touchmove', (e) => {
 
 canvas.addEventListener('touchend', () => {
   isDragging = false;
-  startDistance = null;
+  isPinching = false;
 });
 
 canvas.addEventListener('dblclick', () => {
@@ -243,7 +240,7 @@ canvas.addEventListener('dblclick', () => {
   drawCanvas();
 });
 
-// ====== DESCARGA DE IMAGEN ======
+// ====== DESCARGA DE IMAGEN EN 2000x2000 PX ======
 function descargarImagen() {
   if (!imageLoaded || !nombreInput.value.trim()) {
     alert("Por favor, sube una imagen y escribe tu nombre.");
@@ -255,27 +252,64 @@ function descargarImagen() {
 
   drawCanvas(); // Asegúrate de que todo esté dibujado
 
-  // Generar número aleatorio de 6 dígitos
-  const numeroAleatorio = Math.floor(100000 + Math.random() * 900000);
-  const filename = `GEST_FUL_SERGIO_VARGAS_${numeroAleatorio}.png`;
+  // Crear un canvas temporal de alta resolución
+  const exportCanvas = document.createElement('canvas');
+  const exportCtx = exportCanvas.getContext('2d');
+  exportCanvas.width = 2000;
+  exportCanvas.height = 2000;
 
-  // Descargar imagen final
-  canvas.toBlob(function(blob) {
-    if (!blob) {
-      alert("Error al generar la imagen. Inténtalo nuevamente.");
-      return;
-    }
+  // Redibujar imagen escalada
+  if (imageLoaded) {
+    const imgWidth = img.width * scale * (2000 / 300);
+    const imgHeight = img.height * scale * (2000 / 300);
+    const x = (2000 - imgWidth) / 2 + offsetX * (2000 / 300);
+    const y = (2000 - imgHeight) / 2 + offsetY * (2000 / 300);
+    exportCtx.drawImage(img, x, y, imgWidth, imgHeight);
+  }
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Dibujar marco encima
+  const tempImg = new Image();
+  tempImg.src = marco.src;
+  tempImg.onload = () => {
+    exportCtx.drawImage(tempImg, 0, 0, 2000, 2000);
 
-    setTimeout(() => {
-      window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSeTfMtTzWq7LVPUl8tJ5lIt2DnlISnz192LWabErIw70FN-wA/viewform?usp=header";
-    }, 2000);
-  }, 'image/png');
+    // Dibujar texto en alta resolución
+    exportCtx.fillStyle = 'white';
+    exportCtx.font = 'bold 87px Arial'; // Texto escalado a 2000px
+    exportCtx.textAlign = 'left';
+    exportCtx.textBaseline = 'middle';
+
+    const linesNombre = nombreInput.value.trim().split(" ");
+    linesNombre.forEach((line, i) => {
+      exportCtx.fillText(line, 70, 1000 - 70 + i * 54); // centrado
+    });
+
+    const linesDanza = ['DANZA:', ...(danzaSelect.value === 'otro' ? [otraDanzaInput.value] : [danzaSelect.value])];
+    linesDanza.forEach((line, i) => {
+      exportCtx.fillText(line, 70, 1000 + 100 + i * 54);
+    });
+
+    // Generar descarga
+    exportCanvas.toBlob(function(blob) {
+      if (!blob) {
+        alert("Error al generar la imagen.");
+        return;
+      }
+
+      const numeroAleatorio = Math.floor(100000 + Math.random() * 900000);
+      const filename = `GEST_FUL_SERGIO_VARGAS_${numeroAleatorio}.png`;
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => {
+        window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSeTfMtTzWq7LVPUl8tJ5lIt2DnlISnz192LWabErIw70FN-wA/viewform?usp=header";
+      }, 2000);
+    }, 'image/png');
+  };
 }
