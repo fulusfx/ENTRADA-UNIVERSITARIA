@@ -1,0 +1,288 @@
+// Elementos del DOM
+const fotoInput = document.getElementById('fotoInput');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const marco = document.getElementById('marco');
+const nombreInput = document.getElementById('nombre');
+const danzaSelect = document.getElementById('danza');
+const otraDanzaInput = document.getElementById('otraDanza');
+const nombreDisplay = document.getElementById('nombreDisplay');
+const danzaDisplay = document.getElementById('danzaDisplay').querySelector('span');
+const sensibilidadRange = document.getElementById('sensibilidadRange');
+
+// Configuración de imagen
+let img = new Image();
+let imageLoaded = false;
+
+// Tamaño del canvas (1x1)
+canvas.width = 300;
+canvas.height = 300;
+
+// Variables para posicionar la imagen
+let offsetX = 0;
+let offsetY = 0;
+let scale = 0.5; // Escala inicial: 50%
+const minScale = 0.1;
+const maxScale = 3;
+
+// Sensibilidad del movimiento con teclas
+let sensibilidad = parseInt(sensibilidadRange.value);
+
+// Contador para nombres únicos de descarga
+let downloadCounter = Math.floor(100000 + Math.random() * 900000); // Número aleatorio inicial
+
+// Cargar marco por defecto
+marco.onload = () => {
+  drawCanvas();
+};
+
+// Función para alternar entrada de danza personalizada
+function toggleOtroInput() {
+  if (danzaSelect.value === "otro") {
+    otraDanzaInput.style.display = 'block';
+  } else {
+    otraDanzaInput.style.display = 'none';
+  }
+}
+
+// Subir imagen
+fotoInput.addEventListener('change', function (e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (event) {
+      img.onload = () => {
+        imageLoaded = true;
+        scale = 0.5;
+        offsetX = 0;
+        offsetY = 0;
+        drawCanvas();
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+// Actualizar texto en tiempo real
+nombreInput.addEventListener('input', actualizarTexto);
+danzaSelect.addEventListener('change', actualizarTexto);
+otraDanzaInput.addEventListener('input', actualizarTexto);
+
+// Ajustar sensibilidad
+sensibilidadRange.addEventListener('input', () => {
+  sensibilidad = parseInt(sensibilidadRange.value);
+});
+
+// Mostrar texto en canvas
+function actualizarTexto() {
+  let nombre = nombreInput.value.trim().split(" ");
+  let danza = danzaSelect.value === "otro" ? otraDanzaInput.value : danzaSelect.value;
+
+  nombreDisplay.innerHTML = nombre.join("<br>");
+  danzaDisplay.innerHTML = danza.split(" ").join("<br>");
+}
+
+// Dibujar todo en el canvas
+function drawCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Dibujar imagen cargada
+  if (imageLoaded) {
+    const imgWidth = img.width * scale;
+    const imgHeight = img.height * scale;
+
+    const x = (canvas.width - imgWidth) / 2 + offsetX;
+    const y = (canvas.height - imgHeight) / 2 + offsetY;
+
+    ctx.drawImage(img, x, y, imgWidth, imgHeight);
+  }
+
+  // Dibujar marco encima
+  if (marco.complete && marco.naturalHeight !== 0) {
+    ctx.drawImage(marco, 0, 0, canvas.width, canvas.height);
+  }
+
+  // Dibujar texto en canvas
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 13px Arial';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+
+  const linesNombre = nombreInput.value.trim().split(" ");
+  linesNombre.forEach((line, i) => {
+    ctx.fillText(line, 10, canvas.height / 2 - 20 + i * 16);
+  });
+
+  const linesDanza = ['DANZA:', ...(danzaSelect.value === 'otro' ? [otraDanzaInput.value] : [danzaSelect.value])];
+  linesDanza.forEach((line, i) => {
+    ctx.fillText(line, 10, canvas.height / 2 + 30 + i * 16);
+  });
+}
+
+// ====== MOVIMIENTO CON RATÓN ======
+let isDragging = false;
+let startX, startY;
+
+canvas.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  startX = e.offsetX;
+  startY = e.offsetY;
+  canvas.style.cursor = 'grabbing';
+});
+
+canvas.addEventListener('mousemove', (e) => {
+  if (isDragging) {
+    offsetX += e.offsetX - startX;
+    offsetY += e.offsetY - startY;
+    startX = e.offsetX;
+    startY = e.offsetY;
+    drawCanvas();
+  }
+});
+
+canvas.addEventListener('mouseup', () => {
+  isDragging = false;
+  canvas.style.cursor = 'default';
+});
+
+canvas.addEventListener('mouseleave', () => {
+  isDragging = false;
+  canvas.style.cursor = 'default';
+});
+
+// ====== MOVER CON TECLAS ======
+document.addEventListener('keydown', (e) => {
+  const step = sensibilidad;
+  switch (e.key) {
+    case 'ArrowUp':
+      offsetY -= step;
+      break;
+    case 'ArrowDown':
+      offsetY += step;
+      break;
+    case 'ArrowLeft':
+      offsetX -= step;
+      break;
+    case 'ArrowRight':
+      offsetX += step;
+      break;
+  }
+  drawCanvas();
+});
+
+// ====== ZOOM CON RUEDA DEL RATÓN ======
+canvas.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const delta = e.deltaY;
+  const step = 0.05;
+  if (delta < 0) {
+    scale = Math.min(maxScale, scale + step);
+  } else {
+    scale = Math.max(minScale, scale - step);
+  }
+  drawCanvas();
+}, { passive: false });
+
+// ====== ZOOM CON BOTONES ======
+function zoom(action) {
+  const step = 0.1;
+  if (action === 'in') {
+    scale = Math.min(maxScale, scale + step);
+  } else if (action === 'out') {
+    scale = Math.max(minScale, scale - step);
+  }
+  drawCanvas();
+}
+
+// ====== PINCH TO ZOOM EN MÓVIL ======
+let startDistance = null;
+let lastScale = scale;
+
+canvas.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 1) {
+    isDragging = true;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  } else if (e.touches.length === 2) {
+    isDragging = false;
+    startDistance = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+    lastScale = scale;
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', (e) => {
+  e.preventDefault();
+
+  if (e.touches.length === 1 && isDragging) {
+    const touch = e.touches[0];
+    offsetX += touch.clientX - startX;
+    offsetY += touch.clientY - startY;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    drawCanvas();
+  } else if (e.touches.length === 2) {
+    const currentDist = Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY
+    );
+
+    const delta = currentDist - startDistance;
+    const zoomFactor = delta * 0.01;
+    scale = Math.min(maxScale, Math.max(minScale, lastScale + zoomFactor));
+    drawCanvas();
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => {
+  isDragging = false;
+  startDistance = null;
+});
+
+// Resetear al hacer doble clic
+canvas.addEventListener('dblclick', () => {
+  scale = 0.5;
+  offsetX = 0;
+  offsetY = 0;
+  drawCanvas();
+});
+
+// ====== DESCARGA DE IMAGEN ======
+function descargarImagen() {
+  if (!imageLoaded || !nombreInput.value.trim()) {
+    alert("Por favor, sube una imagen y escribe tu nombre.");
+    return;
+  }
+
+  const confirmacion = confirm("Por favor subir su imagen y datos al siguiente formulario para su registro como danzarin");
+  if (!confirmacion) return;
+
+  drawCanvas(); // Asegúrate de que todo esté dibujado
+
+  // Generar número aleatorio de 6 dígitos
+  const numeroAleatorio = Math.floor(100000 + Math.random() * 900000);
+  const filename = `GEST_FUL_SERGIO_VARGAS_${numeroAleatorio}.png`;
+
+  // Descargar imagen
+  canvas.toBlob(function(blob) {
+    if (!blob) {
+      alert("Error al generar la imagen. Inténtalo nuevamente.");
+      return;
+    }
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setTimeout(() => {
+      window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSeTfMtTzWq7LVPUl8tJ5lIt2DnlISnz192LWabErIw70FN-wA/viewform?usp=header";
+    }, 2000);
+  }, 'image/png');
+}

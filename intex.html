@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Danzarín</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Generador Danzarin</h1>
+
+    <div class="form-group">
+      <label for="nombre">Nombre y Apellido:</label>
+      <input type="text" id="nombre" placeholder="Ej: Juan Perez" maxlength="50" />
+    </div>
+
+    <div class="form-group">
+      <label for="danza">Selecciona tu danza:</label>
+      <select id="danza" onchange="toggleOtroInput()">
+        <option value="">-- Selecciona --</option>
+        <option value="Diablada">Diablada</option>
+        <option value="Morenada">Morenada</option>
+        <option value="Caporales">Caporales</option>
+        <option value="Llamerada">Llamerada</option>
+        <option value="Tinkuy">Tinkuy</option>
+        <option value="Tobas">Tobas</option>
+        <option value="Saya Afroboliviana">Saya Afroboliviana</option>
+        <option value="Pujllay">Pujllay</option>
+        <option value="Mineritos">Mineritos</option>
+        <option value="otro">Otro</option>
+      </select>
+      <input type="text" id="otraDanza" placeholder="Escribe tu danza" style="display:none;" />
+    </div>
+
+    <div class="upload-section">
+      <input type="file" id="fotoInput" accept="image/*" />
+      <p>Sube tu foto (formato cuadrado recomendado)</p>
+    </div>
+
+    <div class="sensitivity-control">
+      <label for="sensibilidadRange">Sensibilidad (teclas):</label>
+      <input type="range" id="sensibilidadRange" min="1" max="50" value="10">
+    </div>
+
+    <div class="controls">
+      <button onclick="zoom('in')">🔍 +</button>
+      <button onclick="zoom('out')">🔍 −</button>
+    </div>
+
+    <div class="canvas-container">
+      <canvas id="canvas"></canvas>
+      <img id="marco" src="assets/marco.png" alt="Marco" />
+      <div id="infoText">
+        <div id="nombreDisplay"></div>
+        <div id="danzaDisplay"><strong style="color: yellow;">DANZA:</strong><br/><span></span></div>
+      </div>
+    </div>
+
+    <button onclick="descargarImagen()">Descargar Imagen</button>
+  </div>
+
+  <!-- Aquí irá tu script.js -->
+  <script src="script.js"></script>
+</body>
+</html>
