@@ -1,136 +1,82 @@
-/* Fondo con degradado rojizo a azul oscuro con efecto metálico */
 body {
   margin: 0;
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #800000, #001f4d);
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #7b1fa2, #0d47a1);
+  background-attachment: fixed;
   color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-user-select: none;
-  user-select: none;
-  touch-action: none;
-}
-
-.container {
-  background: rgba(0, 0, 0, 0.5);
-  border: 2px solid #ccc;
-  padding: 20px;
-  border-radius: 12px;
   text-align: center;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
-  max-width: 90vw;
-  width: 320px;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  text-size-adjust: none;
 }
 
 h1 {
-  margin-bottom: 20px;
+  margin-top: 20px;
   font-size: 24px;
-  color: #ffcc00;
-  text-shadow: 1px 1px 4px #000;
 }
 
-/* Canvas y marco */
-.canvas-wrapper {
-  position: relative;
+.container {
+  margin: 20px auto;
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+canvas {
   width: 300px;
   height: 300px;
-  margin: 0 auto 15px;
+  background-color: #000;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  touch-action: none;
 }
 
-#canvas {
-  border: 1px solid #ccc;
-  width: 300px;
-  height: 300px;
-  background: #222;
-  display: block;
-}
-
-#frame {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 300px;
-  height: 300px;
-  pointer-events: none;
-}
-
-/* Formularios */
-.form-group {
-  margin-bottom: 15px;
-  text-align: left;
-}
-
-label {
-  font-weight: bold;
-  font-size: 14px;
-}
-
+input[type="file"],
 input[type="text"],
-select {
+select,
+button {
   width: 100%;
   padding: 8px;
-  border-radius: 6px;
-  border: none;
-  margin-top: 5px;
   font-size: 14px;
-}
-
-/* Controles de zoom */
-.controls {
-  margin: 10px 0;
-}
-
-.controls button {
-  font-size: 18px;
-  padding: 8px 14px;
-  margin: 0 5px;
-  background-color: #ffcc00;
-  border: none;
   border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background 0.3s;
-}
-
-.controls button:hover {
-  background-color: #e6b800;
-}
-
-/* Botón de descarga */
-#download {
-  margin-top: 15px;
-  padding: 10px 18px;
-  font-size: 16px;
-  font-weight: bold;
-  background-color: #0066cc;
-  color: white;
   border: none;
-  border-radius: 8px;
+  outline: none;
+}
+
+button {
+  background-color: #2196f3;
+  color: white;
+  font-weight: bold;
   cursor: pointer;
   transition: background 0.3s;
 }
 
-#download:hover {
-  background-color: #004c99;
+button:hover {
+  background-color: #1976d2;
 }
 
-/* Responsivo */
-@media (max-width: 400px) {
-  .container {
-    width: 95vw;
-  }
+#zoomControls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
 
-  #canvas,
-  #frame {
-    width: 260px;
-    height: 260px;
-  }
+#danzaCustom {
+  display: none;
+}
 
-  .canvas-wrapper {
-    width: 260px;
-    height: 260px;
+@media (max-width: 500px) {
+  canvas {
+    width: 90vw;
+    height: 90vw;
   }
 }
+
+/* Estilo para textos dentro del canvas se definen en el script con fillStyle y font */
