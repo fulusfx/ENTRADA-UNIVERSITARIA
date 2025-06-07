@@ -29,14 +29,13 @@ const maxScale = 3;
 let sensibilidad = parseInt(sensibilidadRange.value);
 
 // Contador para nombres únicos de descarga
-let downloadCounter = Math.floor(100000 + Math.random() * 900000); // Número aleatorio inicial
+let downloadCounter = Math.floor(100000 + Math.random() * 900000); // Número aleatorio
 
 // Cargar marco por defecto
 marco.onload = () => {
   drawCanvas();
 };
 
-// Función para alternar entrada de danza personalizada
 function toggleOtroInput() {
   if (danzaSelect.value === "otro") {
     otraDanzaInput.style.display = 'block';
@@ -45,7 +44,6 @@ function toggleOtroInput() {
   }
 }
 
-// Subir imagen
 fotoInput.addEventListener('change', function (e) {
   const file = e.target.files[0];
   if (file) {
@@ -64,17 +62,14 @@ fotoInput.addEventListener('change', function (e) {
   }
 });
 
-// Actualizar texto en tiempo real
 nombreInput.addEventListener('input', actualizarTexto);
 danzaSelect.addEventListener('change', actualizarTexto);
 otraDanzaInput.addEventListener('input', actualizarTexto);
 
-// Ajustar sensibilidad
 sensibilidadRange.addEventListener('input', () => {
   sensibilidad = parseInt(sensibilidadRange.value);
 });
 
-// Mostrar texto en canvas
 function actualizarTexto() {
   let nombre = nombreInput.value.trim().split(" ");
   let danza = danzaSelect.value === "otro" ? otraDanzaInput.value : danzaSelect.value;
@@ -83,7 +78,6 @@ function actualizarTexto() {
   danzaDisplay.innerHTML = danza.split(" ").join("<br>");
 }
 
-// Dibujar todo en el canvas
 function drawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -242,7 +236,6 @@ canvas.addEventListener('touchend', () => {
   startDistance = null;
 });
 
-// Resetear al hacer doble clic
 canvas.addEventListener('dblclick', () => {
   scale = 0.5;
   offsetX = 0;
@@ -266,7 +259,7 @@ function descargarImagen() {
   const numeroAleatorio = Math.floor(100000 + Math.random() * 900000);
   const filename = `GEST_FUL_SERGIO_VARGAS_${numeroAleatorio}.png`;
 
-  // Descargar imagen
+  // Descargar imagen final
   canvas.toBlob(function(blob) {
     if (!blob) {
       alert("Error al generar la imagen. Inténtalo nuevamente.");
