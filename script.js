@@ -29,27 +29,35 @@ function drawCanvas() {
     ctx.drawImage(image, x, y, imgW, imgH);
   }
 
-  // Textos
+  // Textos (centrado a la izquierda)
   const fullName = nameInput.value.trim().split(/\s+/);
   const firstName = fullName[0] || '';
   const lastName = fullName[1] || '';
 
   ctx.font = 'bold 16px Arial';
-  ctx.fillStyle = 'white';
   ctx.textAlign = 'left';
 
-  ctx.fillText(firstName, 10, 30);
-  ctx.fillText(lastName, 10, 50);
+  // Posición izquierda centrada verticalmente
+  const textX = 15;
+  const startY = 80;
+  let yOffset = 0;
+
+  ctx.fillStyle = 'white';
+  ctx.fillText(firstName, textX, startY + yOffset);
+  yOffset += 20;
+  ctx.fillText(lastName, textX, startY + yOffset);
+  yOffset += 30;
 
   ctx.fillStyle = 'yellow';
-  ctx.fillText('DANZA:', 10, 75);
+  ctx.fillText('DANZA:', textX, startY + yOffset);
+  yOffset += 25;
 
   ctx.fillStyle = 'white';
   let danzaValue = danzaSelect.value === 'Otro' ? danzaCustom.value.trim() : danzaSelect.value;
   if (danzaValue) {
     const words = danzaValue.split(' ');
     words.forEach((word, i) => {
-      ctx.fillText(word, 10, 95 + i * 20);
+      ctx.fillText(word, textX, startY + yOffset + i * 20);
     });
   }
 
@@ -63,7 +71,6 @@ upload.addEventListener('change', (e) => {
   reader.onload = (ev) => {
     image = new Image();
     image.onload = () => {
-      // Inicializa posición y escala
       scale = Math.max(300 / image.width, 300 / image.height);
       pos = {
         x: (canvas.width - image.width * scale) / 2,
@@ -77,11 +84,7 @@ upload.addEventListener('change', (e) => {
 });
 
 danzaSelect.addEventListener('change', () => {
-  if (danzaSelect.value === 'Otro') {
-    danzaCustom.style.display = 'block';
-  } else {
-    danzaCustom.style.display = 'none';
-  }
+  danzaCustom.style.display = danzaSelect.value === 'Otro' ? 'block' : 'none';
   drawCanvas();
 });
 
@@ -107,22 +110,20 @@ canvas.addEventListener('mouseleave', () => (drag = false));
 
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
-  scale += e.deltaY < 0 ? 0.05 : -0.05;
+  scale += e.deltaY < 0 ? 0.01 : -0.01;
   scale = Math.max(0.1, Math.min(5, scale));
   drawCanvas();
 }, { passive: false });
 
-// Zoom buttons
 zoomIn.addEventListener('click', () => {
-  scale = Math.min(scale + 0.05, 5);
+  scale = Math.min(scale + 0.01, 5);
   drawCanvas();
 });
 zoomOut.addEventListener('click', () => {
-  scale = Math.max(scale - 0.05, 0.1);
+  scale = Math.max(scale - 0.01, 0.1);
   drawCanvas();
 });
 
-// Teclas para mover con precisión
 window.addEventListener('keydown', (e) => {
   const step = 2;
   switch (e.key) {
@@ -134,7 +135,6 @@ window.addEventListener('keydown', (e) => {
   drawCanvas();
 });
 
-// Touch for mobile: drag
 canvas.addEventListener('touchstart', (e) => {
   if (e.touches.length === 1) {
     start.x = e.touches[0].clientX;
@@ -160,19 +160,17 @@ canvas.addEventListener('touchmove', (e) => {
     const dy = e.touches[0].clientY - e.touches[1].clientY;
     const newDist = Math.hypot(dx, dy);
     const delta = newDist - lastTouchDistance;
-    scale += delta * 0.005;
+    scale += delta * 0.002;
     scale = Math.max(0.1, Math.min(5, scale));
     lastTouchDistance = newDist;
   }
   drawCanvas();
 }, { passive: false });
 
-// Previene el zoom global en móviles
 document.addEventListener('gesturestart', e => e.preventDefault());
 document.addEventListener('gesturechange', e => e.preventDefault());
 document.addEventListener('gestureend', e => e.preventDefault());
 
-// Descargar imagen compuesta en alta resolución
 downloadBtn.addEventListener('click', () => {
   alert("Por favor subir su imagen y datos al siguiente formulario para su registro como danzarin");
 
@@ -180,10 +178,8 @@ downloadBtn.addEventListener('click', () => {
   finalCanvas.width = 2000;
   finalCanvas.height = 2000;
   const ctx2 = finalCanvas.getContext('2d');
-
   const scaleFactor = 2000 / 300;
 
-  // Imagen base
   if (image.src) {
     const imgW = image.width * scale * scaleFactor;
     const imgH = image.height * scale * scaleFactor;
@@ -192,27 +188,31 @@ downloadBtn.addEventListener('click', () => {
     ctx2.drawImage(image, x, y, imgW, imgH);
   }
 
-  // Texto
-  ctx2.font = 'bold 90px Arial';
-  ctx2.fillStyle = 'white';
-  ctx2.textAlign = 'left';
   const fullName = nameInput.value.trim().split(/\s+/);
-  ctx2.fillText(fullName[0] || '', 60, 160);
-  ctx2.fillText(fullName[1] || '', 60, 260);
+  ctx2.font = 'bold 90px Arial';
+  ctx2.textAlign = 'left';
+  const textX = 100;
+  let yOffset = 300;
+
+  ctx2.fillStyle = 'white';
+  ctx2.fillText(fullName[0] || '', textX, yOffset);
+  yOffset += 100;
+  ctx2.fillText(fullName[1] || '', textX, yOffset);
+  yOffset += 120;
 
   ctx2.fillStyle = 'yellow';
-  ctx2.fillText('DANZA:', 60, 370);
+  ctx2.fillText('DANZA:', textX, yOffset);
+  yOffset += 100;
 
   ctx2.fillStyle = 'white';
   let danzaValue = danzaSelect.value === 'Otro' ? danzaCustom.value.trim() : danzaSelect.value;
   if (danzaValue) {
     const words = danzaValue.split(' ');
     words.forEach((word, i) => {
-      ctx2.fillText(word, 60, 470 + i * 100);
+      ctx2.fillText(word, textX, yOffset + i * 100);
     });
   }
 
-  // Marco
   const frameHighRes = new Image();
   frameHighRes.onload = () => {
     ctx2.drawImage(frameHighRes, 0, 0, 2000, 2000);
