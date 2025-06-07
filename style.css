@@ -49,6 +49,13 @@ button {
   outline: none;
 }
 
+.form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
 button {
   background-color: #2196f3;
   color: white;
