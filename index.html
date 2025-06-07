@@ -2,62 +2,50 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <title>Danzarín</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <div class="container">
-    <h1>Generador Danzarin</h1>
+    <h1>Danzarín</h1>
+
+    <div class="canvas-wrapper">
+      <canvas id="canvas" width="300" height="300"></canvas>
+      <img id="frame" src="assets/marco.png" alt="Marco" />
+    </div>
+
+    <input type="file" id="upload" accept="image/*" />
 
     <div class="form-group">
-      <label for="nombre">Nombre y Apellido:</label>
-      <input type="text" id="nombre" placeholder="Ej: Juan Perez" maxlength="50" />
+      <label for="nameInput">Nombre y Apellido:</label>
+      <input type="text" id="nameInput" maxlength="50" placeholder="Ej: Sergio Vargas" />
     </div>
 
     <div class="form-group">
-      <label for="danza">Selecciona tu danza:</label>
-      <select id="danza" onchange="toggleOtroInput()">
-        <option value="">-- Selecciona --</option>
-        <option value="Diablada">Diablada</option>
-        <option value="Morenada">Morenada</option>
-        <option value="Caporales">Caporales</option>
-        <option value="Llamerada">Llamerada</option>
-        <option value="Tinkuy">Tinkuy</option>
-        <option value="Tobas">Tobas</option>
-        <option value="Saya Afroboliviana">Saya Afroboliviana</option>
-        <option value="Pujllay">Pujllay</option>
-        <option value="Mineritos">Mineritos</option>
-        <option value="otro">Otro</option>
+      <label for="danzaSelect">Selecciona una danza:</label>
+      <select id="danzaSelect">
+        <option value="" disabled selected>Elegir danza</option>
+        <option>Diablada</option>
+        <option>Morenada</option>
+        <option>Caporales</option>
+        <option>Llamerada</option>
+        <option>Tinkuy</option>
+        <option>Tobas</option>
+        <option>Saya Afroboliviana</option>
+        <option>Pujllay</option>
+        <option>Mineritos</option>
+        <option>Otro</option>
       </select>
-      <input type="text" id="otraDanza" placeholder="Escribe tu danza" style="display:none;" />
-    </div>
-
-    <div class="upload-section">
-      <input type="file" id="fotoInput" accept="image/*" />
-      <p>Sube tu foto (formato cuadrado recomendado)</p>
-    </div>
-
-    <div class="sensitivity-control">
-      <label for="sensibilidadRange">Sensibilidad (teclas):</label>
-      <input type="range" id="sensibilidadRange" min="1" max="50" value="10">
+      <input type="text" id="danzaCustom" placeholder="Escribe la danza" style="display: none;" />
     </div>
 
     <div class="controls">
-      <button onclick="zoom('in')">🔍 +</button>
-      <button onclick="zoom('out')">🔍 −</button>
+      <button id="zoomIn">+</button>
+      <button id="zoomOut">−</button>
     </div>
 
-    <div class="canvas-container">
-      <canvas id="canvas"></canvas>
-      <img id="marco" src="assets/marco.png" alt="Marco" />
-      <div id="infoText">
-        <div id="nombreDisplay"></div>
-        <div id="danzaDisplay"><strong style="color: yellow;">DANZA:</strong><br/><span></span></div>
-      </div>
-    </div>
-
-    <button onclick="descargarImagen()">Descargar Imagen</button>
+    <button id="download">Descargar Imagen</button>
   </div>
 
   <script src="script.js"></script>
