@@ -1,3 +1,4 @@
+// script.js
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const upload = document.getElementById('upload');
@@ -21,47 +22,44 @@ let lastTouchDistance = 0;
 function drawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  if (image.src) {
+  if (image.src && image.complete) {
     const imgW = image.width * scale;
     const imgH = image.height * scale;
-    const x = pos.x;
-    const y = pos.y;
-    ctx.drawImage(image, x, y, imgW, imgH);
+    ctx.drawImage(image, pos.x, pos.y, imgW, imgH);
   }
 
-  // Textos (centrado a la izquierda)
-  const fullName = nameInput.value.trim().split(/\s+/);
-  const firstName = fullName[0] || '';
-  const lastName = fullName[1] || '';
+  // Dibujar texto
+  const nameParts = nameInput.value.trim().split(/\s+/);
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts[1] || '';
 
   ctx.font = 'bold 16px Arial';
   ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
 
-  // Posición izquierda centrada verticalmente
   const textX = 15;
-  const startY = 80;
-  let yOffset = 0;
+  let yOffset = 70;
 
   ctx.fillStyle = 'white';
-  ctx.fillText(firstName, textX, startY + yOffset);
+  ctx.fillText(firstName, textX, yOffset);
   yOffset += 20;
-  ctx.fillText(lastName, textX, startY + yOffset);
+  ctx.fillText(lastName, textX, yOffset);
   yOffset += 30;
 
   ctx.fillStyle = 'yellow';
-  ctx.fillText('DANZA:', textX, startY + yOffset);
+  ctx.fillText('DANZA:', textX, yOffset);
   yOffset += 25;
 
   ctx.fillStyle = 'white';
-  let danzaValue = danzaSelect.value === 'Otro' ? danzaCustom.value.trim() : danzaSelect.value;
-  if (danzaValue) {
-    const words = danzaValue.split(' ');
-    words.forEach((word, i) => {
-      ctx.fillText(word, textX, startY + yOffset + i * 20);
+  let danza = danzaSelect.value === 'Otro' ? danzaCustom.value.trim() : danzaSelect.value;
+  if (danza) {
+    danza.split(' ').forEach((word, i) => {
+      ctx.fillText(word, textX, yOffset + i * 20);
     });
   }
 
-  ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
+  // Marco encima de todo
+  if (frameImage.complete) ctx.drawImage(frameImage, 0, 0, canvas.width, canvas.height);
 }
 
 upload.addEventListener('change', (e) => {
@@ -74,7 +72,7 @@ upload.addEventListener('change', (e) => {
       scale = Math.max(300 / image.width, 300 / image.height);
       pos = {
         x: (canvas.width - image.width * scale) / 2,
-        y: (canvas.height - image.height * scale) / 2,
+        y: (canvas.height - image.height * scale) / 2
       };
       drawCanvas();
     };
@@ -105,8 +103,8 @@ canvas.addEventListener('mousemove', (e) => {
   drawCanvas();
 });
 
-canvas.addEventListener('mouseup', () => (drag = false));
-canvas.addEventListener('mouseleave', () => (drag = false));
+canvas.addEventListener('mouseup', () => drag = false);
+canvas.addEventListener('mouseleave', () => drag = false);
 
 canvas.addEventListener('wheel', (e) => {
   e.preventDefault();
@@ -121,17 +119,6 @@ zoomIn.addEventListener('click', () => {
 });
 zoomOut.addEventListener('click', () => {
   scale = Math.max(scale - 0.01, 0.1);
-  drawCanvas();
-});
-
-window.addEventListener('keydown', (e) => {
-  const step = 2;
-  switch (e.key) {
-    case 'ArrowLeft': pos.x -= step; break;
-    case 'ArrowRight': pos.x += step; break;
-    case 'ArrowUp': pos.y -= step; break;
-    case 'ArrowDown': pos.y += step; break;
-  }
   drawCanvas();
 });
 
@@ -167,10 +154,6 @@ canvas.addEventListener('touchmove', (e) => {
   drawCanvas();
 }, { passive: false });
 
-document.addEventListener('gesturestart', e => e.preventDefault());
-document.addEventListener('gesturechange', e => e.preventDefault());
-document.addEventListener('gestureend', e => e.preventDefault());
-
 downloadBtn.addEventListener('click', () => {
   alert("Por favor subir su imagen y datos al siguiente formulario para su registro como danzarin");
 
@@ -180,7 +163,7 @@ downloadBtn.addEventListener('click', () => {
   const ctx2 = finalCanvas.getContext('2d');
   const scaleFactor = 2000 / 300;
 
-  if (image.src) {
+  if (image.src && image.complete) {
     const imgW = image.width * scale * scaleFactor;
     const imgH = image.height * scale * scaleFactor;
     const x = pos.x * scaleFactor;
@@ -188,16 +171,20 @@ downloadBtn.addEventListener('click', () => {
     ctx2.drawImage(image, x, y, imgW, imgH);
   }
 
-  const fullName = nameInput.value.trim().split(/\s+/);
+  const nameParts = nameInput.value.trim().split(/\s+/);
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts[1] || '';
+
   ctx2.font = 'bold 90px Arial';
   ctx2.textAlign = 'left';
+  ctx2.textBaseline = 'top';
   const textX = 100;
   let yOffset = 300;
 
   ctx2.fillStyle = 'white';
-  ctx2.fillText(fullName[0] || '', textX, yOffset);
+  ctx2.fillText(firstName, textX, yOffset);
   yOffset += 100;
-  ctx2.fillText(fullName[1] || '', textX, yOffset);
+  ctx2.fillText(lastName, textX, yOffset);
   yOffset += 120;
 
   ctx2.fillStyle = 'yellow';
@@ -205,10 +192,9 @@ downloadBtn.addEventListener('click', () => {
   yOffset += 100;
 
   ctx2.fillStyle = 'white';
-  let danzaValue = danzaSelect.value === 'Otro' ? danzaCustom.value.trim() : danzaSelect.value;
-  if (danzaValue) {
-    const words = danzaValue.split(' ');
-    words.forEach((word, i) => {
+  let danza = danzaSelect.value === 'Otro' ? danzaCustom.value.trim() : danzaSelect.value;
+  if (danza) {
+    danza.split(' ').forEach((word, i) => {
       ctx2.fillText(word, textX, yOffset + i * 100);
     });
   }
@@ -222,7 +208,6 @@ downloadBtn.addEventListener('click', () => {
       link.download = `Sergio_Vargas_Gestion_Ful_USFX_${num}.png`;
       link.href = URL.createObjectURL(blob);
       link.click();
-
       setTimeout(() => {
         window.location.href = 'https://docs.google.com/forms/d/e/1FAIpQLSeTfMtTzWq7LVPUl8tJ5lIt2DnlISnz192LWabErIw70FN-wA/viewform?usp=header';
       }, 4000);
